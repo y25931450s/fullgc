@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xiaoying.base.feedback.infrastructure.dao.IssueReportMapper">
+
+    <resultMap id="IssueReportMapper" type="com.xiaoying.base.feedback.infrastructure.entity.IssueReportDO">
+        <result property="issueTypeId" column="issue_type_id"/>
+        <result property="isNew" column="is_new"/>
+        <result property="gmtCreate" column="gmt_create"/>
+        <result property="gmtModified" column="gmt_modified"/>
+        <result property="countryCode" column="country_code"/>
+        <result property="evaluationTypeId" column="evaluation_type_id"/>
+        <result property="operateName" column="operate_name"/>
+        <result property="issueState" column="issue_state"/>
+        <result property="sysVer" column="sys_ver"/>
+        <result property="countryCode" column="country_code"/>
+        <result property="deviceType" column="device_os"/>
+        <result property="appVersion" column="app_version"/>
+        <result property="productId" column="product_id"/>
+        <result property="isVip" column="is_vip"/>
+        <result property="serviceCreateTime" column="operate_create_time"/>
+        <result property="serviceModifyTime" column="operate_modify_time"/>
+        <result property="completeReason" column="complete_reason"/>
+        <result property="completeTime" column="complete_time"/>
+        <result property="replyTime" column="reply_time"/>
+    </resultMap>
+
+
+    <resultMap id="platformInfoMapper" type="com.xiaoying.base.feedback.infrastructure.BO.IssueDetailInfoBO">
+        <result property="issueState" column="issue_state"/>
+        <result property="issueTypeId" column="issue_type_id"/>
+        <result property="operateName" column="operate_name"/>
+    </resultMap>
+
+
+    <update id="updateIssueReport"
+            parameterType="com.xiaoying.base.feedback.infrastructure.entity.IssueReportDO">
+        update issue_report
+        <set>
+            <if test="operateName != null">
+                operate_name=#{operateName},
+            </if>
+            <if test="evaluationTypeId != null">
+                evaluation_type_id=#{evaluationTypeId},
+            </if>
+            <if test="issueState != null">
+                issue_state=#{issueState},
+            </if>
+            <if test="serviceCreateTime != null">
+                operate_create_time=#{serviceCreateTime},
+            </if>
+            <if test="serviceModifyTime != null">
+                operate_modify_time=#{serviceModifyTime},
+            </if>
+            <if test="operateCount != null">
+                operate_count=#{operateCount},
+            </if>
+            <if test="completeTime != null">
+                complete_time=#{completeTime},
+            </if>
+            <if test="replyTime != null">
+                reply_time=#{replyTime},
+            </if>
+            <if test="isNew != null">
+                is_new=#{isNew},
+            </if>
+            <if test="completeReason != null">
+                complete_reason=#{completeReason}
+            </if>
+        </set>
+        where issueId=#{issueId}
+    </update>
+
+    <update id="updateIssueReportModifyTime"
+            parameterType="com.xiaoying.base.feedback.infrastructure.entity.IssueReportDO">
+        update issue_report
+
+        set gmt_modified=now()
+
+        where issueId=#{issueId}
+    </update>
+
+
+    <insert id="insertIssueReport"
+            parameterType="com.xiaoying.base.feedback.infrastructure.entity.IssueReportDO">
+      insert into issue_report (issueId,duiddigest,auid,issue_type_id,is_vip,country_code,lang,gmt_create,sys_ver,device_os,app_key,product_id,channel,app_version,zone,gmt_modified)
+      value (#{issueId},#{duiddigest},#{auid},#{issueTypeId},#{isVip},#{countryCode},#{lang},now(),#{sysVer},#{deviceType},#{appKey},#{producrtId},#{channel},#{appVersion},#{zone},now())
+    </insert>
+
+
+    <select id="getIssueReport" parameterType="com.xiaoying.base.feedback.infrastructure.BO.IssueReportBO"
+            resultMap="IssueReportMapper">
+        SELECT
+        *
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="duiddigest != null ">
+            AND duiddigest=#{duiddigest}
+        </if>
+        <if test="auid != null ">
+            AND auid=#{auid}
+        </if>
+        <if test="issueTypeId != null ">
+            AND issue_type_id=#{issueTypeId}
+        </if>
+        <if test="productId != null ">
+            AND product_id=#{productId}
+        </if>
+        <if test="evaluationTypeId != null ">
+            AND evaluation_type_id=#{evaluationTypeId}
+        </if>
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="isNew != null ">
+            AND is_new=#{isNew}
+        </if>
+        <if test="operateName != null ">
+            AND operate_name=#{operateName}
+        </if>
+        <if test="issueState != null ">
+            AND issue_state=#{issueState}
+        </if>
+        <if test="countryCode != null ">
+            AND country_code=#{countryCode}
+        </if>
+        <if test="countryList != null and countryList.size() > 0">
+            and country_code in
+            <foreach collection="countryList" open="(" close=")" separator="," item="country">
+                #{country}
+            </foreach>
+        </if>
+        <if test="sysVer != null ">
+            AND sys_ver=#{sysVer}
+        </if>
+        <if test="lang != null ">
+            AND lang like concat(#{lang}, '%')
+        </if>
+        <if test="deviceType != null ">
+            AND device_os=#{deviceType}
+        </if>
+        <if test="appVersion != null ">
+            AND app_version=#{appVersion}
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        <if test="completeReason != null ">
+            AND complete_reason=#{completeReason}
+        </if>
+        <if test="order != null and orderRule!= null">
+            order by ${order} ${orderRule}
+        </if>
+        <if test="pageSize != null and pageNo != null">
+            limit #{pageNo},#{pageSize}
+        </if>
+        <if test="pageSize == null or pageNo == null">
+            limit 0,100
+        </if>
+
+    </select>
+
+
+    <select id="getIssueReportCount" parameterType="com.xiaoying.base.feedback.infrastructure.BO.IssueReportBO"
+            resultType="Integer">
+        SELECT
+        count(*)
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="duiddigest != null ">
+            AND duiddigest=#{duiddigest}
+        </if>
+        <if test="auid != null ">
+            AND auid=#{auid}
+        </if>
+        <if test="issueTypeId != null ">
+            AND issue_type_id=#{issueTypeId}
+        </if>
+        <if test="productId != null ">
+            AND product_id=#{productId}
+        </if>
+        <if test="evaluationTypeId != null ">
+            AND evaluation_type_id=#{evaluationTypeId}
+        </if>
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="isNew != null ">
+            AND is_new=#{isNew}
+        </if>
+        <if test="operateName != null ">
+            AND operate_name=#{operateName}
+        </if>
+        <if test="issueState != null ">
+            AND issue_state=#{issueState}
+        </if>
+        <if test="countryCode != null ">
+            AND country_code=#{countryCode}
+        </if>
+        <if test="countryList != null and countryList.size() > 0">
+            and country_code in
+            <foreach collection="countryList" open="(" close=")" separator="," item="country">
+                #{country}
+            </foreach>
+        </if>
+        <if test="sysVer != null ">
+            AND sys_ver=#{sysVer}
+        </if>
+        <if test="lang != null ">
+            AND lang=#{lang}
+        </if>
+        <if test="deviceType != null ">
+            AND device_os=#{deviceType}
+        </if>
+        <if test="appVersion != null ">
+            AND app_version=#{appVersion}
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        <if test="completeReason != null ">
+            AND complete_reason=#{completeReason}
+        </if>
+
+
+    </select>
+
+    <select id="getIssueReportById" parameterType="Long" resultMap="IssueReportMapper">
+
+         SELECT
+         duiddigest,issue_state
+         from `issue_report`
+         where issueId=#{issueId}
+    </select>
+
+
+    <select id="getIssueReportByTime" parameterType="com.xiaoying.base.feedback.infrastructure.entity.IssueReportDO"
+            resultMap="IssueReportMapper">
+
+         SELECT
+         *
+         from `issue_report`
+         where gmt_modified &lt;= #{gmtModified}
+         and complete_reason=0
+         and is_new!=0
+             </select>
+
+
+    <select id="getIssueDetailInfo" parameterType="com.xiaoying.base.feedback.infrastructure.BO.PlatformInfoBO"
+            resultMap="platformInfoMapper">
+        SELECT
+        count(issueId) as totalIssue,
+        count(case when issue_state in (0) then issue_state else null end) as pendingIssue,
+        count(case when issue_state in (1,2) then issue_state else null end) as processingIssue,
+        count(case when issue_state in (3,4) then issue_state else null end) as solvedIssue,
+        count(case when issue_state in (5) then issue_state else null end) as automationIssue,
+        issue_type_id
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="issueTypeIdList != null and issueTypeIdList.size() > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIdList" open="(" close=")" separator="," item="issueTypeId">
+                #{issueTypeId}
+            </foreach>
+        </if>
+        <if test="productId != null ">
+            AND product_id=#{productId}
+        </if>
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="countryList != null and countryList.size() > 0">
+            and country_code in
+            <foreach collection="countryList" open="(" close=")" separator="," item="country">
+                #{country}
+            </foreach>
+        </if>
+        <if test="lang != null ">
+            AND lang like concat(#{lang}, '%')
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        group by issue_type_id
+    </select>
+
+
+    <select id="getPeopleDetailInfo" parameterType="com.xiaoying.base.feedback.infrastructure.BO.PlatformInfoBO"
+            resultMap="platformInfoMapper">
+        SELECT
+        count(issueId) as totalIssue,
+        count(case when issue_state in (0) then issue_state else null end) as pendingIssue,
+        count(case when issue_state in (1,2) then issue_state else null end) as processingIssue,
+        count(case when issue_state in (3,4) then issue_state else null end) as solvedIssue,
+        count(case when issue_state in (5) then issue_state else null end) as automationIssue,
+        operate_name
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="operateNameList != null and operateNameList.size() > 0">
+            and operate_name in
+            <foreach collection="operateNameList" open="(" close=")" separator="," item="operateName">
+                #{operateName}
+            </foreach>
+        </if>
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        group by operate_name
+    </select>
+
+    <select id="getProcessingTime" parameterType="com.xiaoying.base.feedback.infrastructure.BO.PlatformInfoBO"
+            resultMap="platformInfoMapper">
+        SELECT
+        SUM(TIMESTAMPDIFF(HOUR,gmt_create,reply_time)) as processingTime,
+        SUM(TIMESTAMPDIFF(HOUR,gmt_create,NOW())) as processingTimeOne,
+        count(issueId) as totalIssue,
+        issue_type_id,
+        operate_name
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="issueTypeIdList != null and issueTypeIdList.size() > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIdList" open="(" close=")" separator="," item="issueTypeId">
+                #{issueTypeId}
+            </foreach>
+        </if>
+        <if test="productId != null ">
+            AND product_id=#{productId}
+        </if>
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="countryList != null and countryList.size() > 0">
+            and country_code in
+            <foreach collection="countryList" open="(" close=")" separator="," item="country">
+                #{country}
+            </foreach>
+        </if>
+        <if test="lang != null ">
+            AND lang like concat(#{lang}, '%')
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        <if test="issueStateList != null and issueStateList.size() > 0">
+            and issue_state in
+            <foreach collection="issueStateList" open="(" close=")" separator="," item="issueState">
+                #{issueState}
+            </foreach>
+        </if>
+        <if test="operateNameList != null and operateNameList.size() > 0">
+            and operate_name in
+            <foreach collection="operateNameList" open="(" close=")" separator="," item="operateName">
+                #{operateName}
+            </foreach>
+        </if>
+        <if test="group != null ">
+            group by ${group}
+        </if>
+    </select>
+
+    <select id="getSolvedTime" parameterType="com.xiaoying.base.feedback.infrastructure.BO.PlatformInfoBO"
+            resultMap="platformInfoMapper">
+        SELECT
+        SUM(TIMESTAMPDIFF(HOUR,gmt_create,complete_time)) as solvedTime,
+        count(issueId) as totalIssue,
+        issue_type_id,
+        operate_name
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="issueTypeIdList != null and issueTypeIdList.size() > 0">
+            and issue_type_id in
+            <foreach collection="issueTypeIdList" open="(" close=")" separator="," item="issueTypeId">
+                #{issueTypeId}
+            </foreach>
+        </if>
+        <if test="productId != null ">
+            AND product_id=#{productId}
+        </if>
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="countryList != null and countryList.size() > 0">
+            and country_code in
+            <foreach collection="countryList" open="(" close=")" separator="," item="country">
+                #{country}
+            </foreach>
+        </if>
+        <if test="lang != null ">
+            AND lang like concat(#{lang}, '%')
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        <if test="issueStateList != null and issueStateList.size() > 0">
+            and issue_state in
+            <foreach collection="issueStateList" open="(" close=")" separator="," item="issueState">
+                #{issueState}
+            </foreach>
+        </if>
+        <if test="operateNameList != null and operateNameList.size() > 0">
+            and operate_name in
+            <foreach collection="operateNameList" open="(" close=")" separator="," item="operateName">
+                #{operateName}
+            </foreach>
+        </if>
+        <if test="group != null ">
+            group by ${group}
+        </if>
+    </select>
+
+
+    <select id="getOperateCount" parameterType="com.xiaoying.base.feedback.infrastructure.BO.PlatformInfoBO"
+            resultMap="platformInfoMapper">
+        SELECT
+        sum(operate_count) as operateCount,
+        operate_name,
+        count(issueId) as totalIssue
+        FROM `issue_report`
+        WHERE 1=1
+        <if test="isVip != null ">
+            AND is_vip=#{isVip}
+        </if>
+        <if test="startTime != null ">
+            AND gmt_create &gt;= #{startTime}
+        </if>
+        <if test="endTime != null ">
+            AND gmt_create &lt;= #{endTime}
+        </if>
+        <if test="issueStateList != null and issueStateList.size() > 0">
+            and issue_state in
+            <foreach collection="issueStateList" open="(" close=")" separator="," item="issueState">
+                #{issueState}
+            </foreach>
+        </if>
+        <if test="operateNameList != null and operateNameList.size() > 0">
+            and operate_name in
+            <foreach collection="operateNameList" open="(" close=")" separator="," item="operateName">
+                #{operateName}
+            </foreach>
+        </if>
+            group by operate_name
+
+    </select>
+
+</mapper>

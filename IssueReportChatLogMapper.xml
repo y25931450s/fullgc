@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.xiaoying.base.feedback.infrastructure.dao.IssueReportChatLogMapper">
+
+    <resultMap id="IssueReportChatLogMapper" type="com.xiaoying.base.feedback.infrastructure.entity.IssueReportChatLogDO">
+        <result property="issueReportId" column="issue_report_id" />
+        <result property="id" column="id" />
+        <result property="chatLogType" column="chat_log_type" />
+        <result property="gmtCreate" column="gmt_create" />
+        <result property="operatorName" column="operator_name" />
+
+    </resultMap>
+
+    <insert id="insertIssueReportChatLog"
+            parameterType="com.xiaoying.base.feedback.infrastructure.entity.IssueReportChatLogDO"
+            useGeneratedKeys="true" keyProperty="id">
+      insert into issue_report_chat_log (issue_report_id,content,type,operator_name,chat_log_type,gmt_create)
+      value (#{issueReportId},#{content},#{type},#{operatorName},#{chatLogType},now())
+    </insert>
+
+
+
+    <select id="selectIssueReportChatLog" parameterType="com.xiaoying.base.feedback.infrastructure.BO.IssueReportChatLogBO" resultMap="IssueReportChatLogMapper">
+        SELECT
+        *
+        FROM `issue_report_chat_log`
+        WHERE 1=1
+        <if test="issueReportIdList != null and issueReportIdList.size() > 0">
+            and issue_report_id in
+            <foreach collection="issueReportIdList" open="(" close=")" separator="," item="issueReportId">
+                #{issueReportId}
+            </foreach>
+        </if>
+        Order by gmt_create desc
+        <if test="pageSize != null and pageNo != null">
+            limit #{pageNo},#{pageSize}
+        </if>
+        <if test="pageSize == null or pageNo == null">
+            limit 0,100
+        </if>
+
+    </select>
+
+
+    <select id="getIssueReportChatLogByid" parameterType="com.xiaoying.base.feedback.infrastructure.entity.IssueReportChatLogDO" resultMap="IssueReportChatLogMapper">
+        SELECT
+        *
+        FROM `issue_report_chat_log`
+        WHERE id=#{id}
+        and issue_report_id=#{issueReportId}
+    </select>
+
+
+</mapper>
